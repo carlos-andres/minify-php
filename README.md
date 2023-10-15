@@ -24,5 +24,3 @@ Contributions are welcome! If you have improvements, bug fixes, or new features,
 [MIT License](LICENSE)
 
 ---
-
-Note: The README assumes that the extension is not yet available on the VSCode marketplace and provides manual installation instructions. If the extension is hosted on the marketplace, then the installation instructions should be updated accordingly. Also, if you have an actual LICENSE file, you can link to it as shown in the License section. Otherwise, you might want to specify your preferred license or remove that section.
