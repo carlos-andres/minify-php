@@ -1,7 +1,9 @@
 {
   "name": "minify-php",
+  "publisher": "calo",
   "displayName": "Minify PHP",
   "description": "This extension that provides the capability to minify PHP source code by removing comments, unnecessary spaces, and reducing it to a single line. Ideal for copying and pasting PHP code into modern AI prompts.",
+  "license": "MIT",
   "version": "0.1.0",
   "engines": {
     "vscode": "^1.80.0"
@@ -18,6 +20,10 @@
         "title": "Minify PHP"
       }
     ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/carlos-andres/minify-php"
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
