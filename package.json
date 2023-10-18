@@ -4,7 +4,7 @@
   "displayName": "Minify PHP",
   "description": "This extension that provides the capability to minify PHP source code by removing comments, unnecessary spaces, and reducing it to a single line. Ideal for copying and pasting PHP code into modern AI prompts.",
   "license": "MIT",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "engines": {
     "vscode": "^1.80.0"
   },
@@ -18,6 +18,14 @@
       {
         "command": "extension.minifyPHP",
         "title": "Minify PHP"
+      },
+      {
+        "command": "extension.minifyAndWrapPHP",
+        "title": "Minify and Word Wrap PHP"
+      },
+      {
+        "command": "extension.minifyAndCopyPHP",
+        "title": "Minify PHP and Copy to Clipboard"
       }
     ]
   },

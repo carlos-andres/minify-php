@@ -4,6 +4,23 @@ All notable changes to the "minify-php" extension are documented in this file.
 
 For more guidance on how to maintain this file, see [Keep a Changelog](http://keepachangelog.com/).
 
+## [0.2.0] -
+
+### Added
+
+- Introduced a new command `extension.minifyAndWrapPHP` that not only minifies the PHP code but also turns on the word wrap setting in the editor.
+- Added another command `extension.minifyAndCopyPHP` that minifies the PHP document and copies the result to the clipboard.
+- Refactored the `minifyActivePHPDocument` function to handle an additional parameter which decides if the word wrap should be turned on after minification.
+
+### Changed
+
+- The original `extension.minifyPHP` command has been updated to ensure that the editor's word wrap setting remains unchanged after the minification process.
+- Enhanced the minification process to handle additional edge cases and provide more consistent results.
+  
+### Removed
+
+- N/A
+
 ## [0.1.0] -
 
 ### Added
@@ -28,5 +45,3 @@ For more guidance on how to maintain this file, see [Keep a Changelog](http://ke
 ### Removed
 
 - N/A
-
----

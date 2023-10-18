@@ -6,14 +6,30 @@ import * as vscode from 'vscode';
  * @param {vscode.ExtensionContext} context - The extension context.
  */
 export function activate(context: vscode.ExtensionContext): void {
-    const disposable = vscode.commands.registerCommand('extension.minifyPHP', async () => {
+    const disposableMinify = vscode.commands.registerCommand('extension.minifyPHP', async () => {
         const shouldPreserveComments = await askPreserveComments();
         if (shouldPreserveComments !== undefined) {
-            minifyActivePHPDocument(shouldPreserveComments);
+            minifyActivePHPDocument(shouldPreserveComments, false);
         }
     });
 
-    context.subscriptions.push(disposable);
+    const disposableMinifyAndWrap = vscode.commands.registerCommand('extension.minifyAndWrapPHP', async () => {
+        const shouldPreserveComments = await askPreserveComments();
+        if (shouldPreserveComments !== undefined) {
+            minifyActivePHPDocument(shouldPreserveComments, true);
+        }
+    });
+
+    const disposableMinifyAndCopy = vscode.commands.registerCommand('extension.minifyAndCopyPHP', async () => {
+        const shouldPreserveComments = await askPreserveComments();
+        if (shouldPreserveComments !== undefined) {
+            const minifiedContent = minifyActivePHPDocument(shouldPreserveComments, false);
+            vscode.env.clipboard.writeText(minifiedContent);
+            vscode.window.showInformationMessage('Minified PHP copied to clipboard!');
+        }
+    });
+
+    context.subscriptions.push(disposableMinify, disposableMinifyAndWrap, disposableMinifyAndCopy);
 }
 
 /**
@@ -39,7 +55,7 @@ async function askPreserveComments(): Promise<boolean | undefined> {
  * @param {boolean} preserveComments - Indicates if comments should be preserved in the minified output.
  * @returns {string} - The minified content.
  */
-function minifyActivePHPDocument(preserveComments: boolean): string {
+function minifyActivePHPDocument(preserveComments: boolean, shouldWrap: boolean): string {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
         return "";
@@ -54,7 +70,22 @@ function minifyActivePHPDocument(preserveComments: boolean): string {
     const originalContent = document.getText();
     const minifiedContent = minifyPHPContent(originalContent, preserveComments);
     setEditorContent(editor, minifiedContent);
+
+    if (shouldWrap) {
+        setWordWrap('on');
+    }
+
     return minifiedContent;
+}
+
+/**
+ * Updates the word wrap settings in the editor.
+ * 
+ * @param {('on' | 'off' | 'wordWrapColumn' | 'bounded')} value - The word wrap mode.
+ */
+function setWordWrap(value: 'on' | 'off' | 'wordWrapColumn' | 'bounded'): void {
+    const config = vscode.workspace.getConfiguration();
+    config.update('editor.wordWrap', value, true);
 }
 
 /**
@@ -112,5 +143,5 @@ function minifyPHPContent(content: string, preserveComments: boolean): string {
  * @returns {Promise<string>} - The minified content.
  */
 export async function minifyForTest(preserveComments: boolean): Promise<string> {
-    return minifyActivePHPDocument(preserveComments);
+    return minifyActivePHPDocument(preserveComments, false);
 }
