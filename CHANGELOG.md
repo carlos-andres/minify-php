@@ -4,6 +4,20 @@ All notable changes to the "minify-php" extension are documented in this file.
 
 For more guidance on how to maintain this file, see [Keep a Changelog](http://keepachangelog.com/).
 
+## [0.2.5] -
+
+### Added
+
+- N/A
+
+### Changed
+
+- Handle better adaptaton to minify code with single line //, i decide to replace it for /* */ to avoid bad php result
+  
+### Removed
+
+- N/A
+
 ## [0.2.0] -
 
 ### Added
