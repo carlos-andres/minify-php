@@ -107,30 +107,27 @@ function setEditorContent(editor: vscode.TextEditor, content: string): void {
  * @returns {string} - The minified content.
  */
 function minifyPHPContent(content: string, preserveComments: boolean): string {
+    // Convert single-line comments to block comments
+    content = content.replace(/\/\/(.*)$/gm, '/*$1*/');
+
+    // Ensure there's a space after */ if not followed by a whitespace or another comment
+    content = content.replace(/\*\//g, '*/ ');
+
     // Remove multi-line comments
     if (!preserveComments) {
         content = content.replace(/\/\*[\s\S]*?\*\//g, '');
-    }
-
-    // Remove single-line comments
-    if (!preserveComments) {
-        content = content.replace(/\/\/.*$/gm, '');
     }
 
     // Remove newlines
     content = content.replace(/\r?\n|\r/g, '');
 
     // Remove unnecessary spaces (multiple spaces get reduced to one). 
-    // This won't affect spaces within strings.
     content = content.replace(/ +/g, ' ');
 
     // Ensure there's a space after <?php
     content = content.replace(/<\?php(?!\s)/g, '<?php ');
 
     // Other tokens might also need similar treatment to prevent invalid PHP.
-    // Depending on the minification requirements, you might want to add more replacements.
-    // For instance, if you'd want a space after '}' (closing brace) to avoid situations 
-    // like '}else' after minification, you can add the following:
     content = content.replace(/\}(?![\s\}])/g, '} ');
 
     return content.trim();
