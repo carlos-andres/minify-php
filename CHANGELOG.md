@@ -4,6 +4,16 @@ All notable changes to the "minify-php" extension are documented in this file.
 
 For more guidance on how to maintain this file, see [Keep a Changelog](http://keepachangelog.com/).
 
+## [0.3.0] -
+
+### Added
+
+- N/A
+
+### Changed
+
+- Handle better the protocols :// and minify options
+
 ## [0.2.5] -
 
 ### Added

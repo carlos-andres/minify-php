@@ -53,6 +53,18 @@ class LoremIpsumGenerator
     {
         return $this->generate(6) . "\n\n" . $this->generate(6);
     }
+
+    /**
+     * Dummy function to simulate opening a URL.
+     *
+     * @param string $url The URL to open.
+     * @return void
+     */
+    function openUrl($url)
+    {
+        // Simulate opening the URL
+        echo "Opening URL: " . $url . "\\n";
+    }
 }
 
 // Usage example
@@ -61,4 +73,9 @@ $generator = new LoremIpsumGenerator();
 // Print result 2 Paragraphs
 echo $generator->generateTwoParagraphs();
 
-?>
+/* Another block comment with a custom protocol: custom://protocol */
+// Comment with https protocol: https://secure.loremipsum.com
+/* Block comment with file protocol: file://loremipsum/path */
+// Another comment with a different protocol: ftp://ftp.loremipsum.com
+// This is a comment with a URL: http://loremipsum.com
+echo $generator->openUrl("http://loremipsum.com");

@@ -1,10 +1,5 @@
 import * as vscode from 'vscode';
 
-/**
- * Activates the extension.
- * 
- * @param {vscode.ExtensionContext} context - The extension context.
- */
 export function activate(context: vscode.ExtensionContext): void {
     const disposableMinify = vscode.commands.registerCommand('extension.minifyPHP', async () => {
         const shouldPreserveComments = await askPreserveComments();
@@ -32,11 +27,6 @@ export function activate(context: vscode.ExtensionContext): void {
     context.subscriptions.push(disposableMinify, disposableMinifyAndWrap, disposableMinifyAndCopy);
 }
 
-/**
- * Prompts the user to determine if comments should be preserved.
- * 
- * @returns {Promise<boolean | undefined>} - True if comments should be preserved, false otherwise. Returns undefined on cancel.
- */
 async function askPreserveComments(): Promise<boolean | undefined> {
     const answer = await vscode.window.showQuickPick(['Yes', 'No', 'Cancel'], {
         placeHolder: 'Preserve comments?'
@@ -49,96 +39,81 @@ async function askPreserveComments(): Promise<boolean | undefined> {
     return answer === 'Yes';
 }
 
-/**
- * Minifies the active PHP document in the editor.
- * 
- * @param {boolean} preserveComments - Indicates if comments should be preserved in the minified output.
- * @returns {string} - The minified content.
- */
 function minifyActivePHPDocument(preserveComments: boolean, shouldWrap: boolean): string {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
         return "";
     }
-
     const document = editor.document;
     if (document.languageId !== 'php') {
         vscode.window.showWarningMessage('Not a PHP file');
         return "";
     }
-
     const originalContent = document.getText();
     const minifiedContent = minifyPHPContent(originalContent, preserveComments);
     setEditorContent(editor, minifiedContent);
-
     if (shouldWrap) {
         setWordWrap('on');
     }
-
     return minifiedContent;
 }
 
-/**
- * Updates the word wrap settings in the editor.
- * 
- * @param {('on' | 'off' | 'wordWrapColumn' | 'bounded')} value - The word wrap mode.
- */
 function setWordWrap(value: 'on' | 'off' | 'wordWrapColumn' | 'bounded'): void {
     const config = vscode.workspace.getConfiguration();
     config.update('editor.wordWrap', value, true);
 }
 
-/**
- * Sets the provided content to the editor.
- * 
- * @param {vscode.TextEditor} editor - The active text editor.
- * @param {string} content - The content to set in the editor.
- */
 function setEditorContent(editor: vscode.TextEditor, content: string): void {
     const entireRange = new vscode.Range(editor.document.positionAt(0), editor.document.positionAt(editor.document.getText().length));
     editor.edit((editBuilder) => editBuilder.replace(entireRange, content));
 }
 
-/**
- * Minifies the given PHP content.
- * 
- * @param {string} content - The original PHP content.
- * @param {boolean} preserveComments - Indicates if comments should be preserved in the minified output.
- * @returns {string} - The minified content.
- */
 function minifyPHPContent(content: string, preserveComments: boolean): string {
-    // Convert single-line comments to block comments
-    content = content.replace(/\/\/(.*)$/gm, '/*$1*/');
-
-    // Ensure there's a space after */ if not followed by a whitespace or another comment
-    content = content.replace(/\*\//g, '*/ ');
-
-    // Remove multi-line comments
     if (!preserveComments) {
-        content = content.replace(/\/\*[\s\S]*?\*\//g, '');
+        // Logic for minifying without preserving comments
+        return content
+            .replace(/\/\*[\s\S]*?\*\/|([^:]|^)\/\/.*$/gm, '')
+            .trim()
+            .replace(/\n/g, ' ')
+            .replace(/\t/g, ' ')
+            .replace(/\s{2,}/g, ' ');
+    } else {
+        // Protect :// protocols
+        const protocols: string[] = [];
+        content = content.replace(/:\/\/\S+/g, (match) => {
+            protocols.push(match);
+            return "PROTOCOL_PLACEHOLDER";
+        });
+
+        // Transform // comments to block comments, avoiding duplicating existing block tokens
+        content = content.replace(/\/\/(?!\/).*$/gm, (match) => {
+            const trimmedComment = match.slice(2).trim();
+            return `/* ${trimmedComment} */`;
+        });
+
+        // Normalize multiline comments
+        content = content.replace(/\/\*\*[\s\S]*?\*\//g, (match) => {
+            // Remove any additional /* or */ inside the comment
+            const cleanedMatch = match.replace(/\/\*|\*\//g, '').trim();
+            return '/* ' + cleanedMatch.split('\n').map(s => s.trim()).join(' ') + ' */';
+        });
+
+        // Remove unnecessary newlines and spaces
+        content = content
+            .replace(/\n\s*\n/g, '\n')
+            .replace(/([^\n])\n([^\n])/g, '$1 $2')
+            .replace(/\{\s*\n\s*\}/g, '{}') // Handle empty blocks
+            .replace(/\s{2,}/g, ' ');
+
+        // Restore :// protocols
+        protocols.forEach((protocol) => {
+            content = content.replace("PROTOCOL_PLACEHOLDER", protocol);
+        });
+
+        return content;
     }
-
-    // Remove newlines
-    content = content.replace(/\r?\n|\r/g, '');
-
-    // Remove unnecessary spaces (multiple spaces get reduced to one). 
-    content = content.replace(/ +/g, ' ');
-
-    // Ensure there's a space after <?php
-    content = content.replace(/<\?php(?!\s)/g, '<?php ');
-
-    // Other tokens might also need similar treatment to prevent invalid PHP.
-    content = content.replace(/\}(?![\s\}])/g, '} ');
-
-    return content.trim();
 }
 
-/**
- * Minifies the active PHP document for testing purposes.
- * 
- * @param {boolean} preserveComments - Indicates if comments should be preserved in the minified output.
- * @returns {Promise<string>} - The minified content.
- */
 export async function minifyForTest(preserveComments: boolean): Promise<string> {
     return minifyActivePHPDocument(preserveComments, false);
 }
